@@ -9,6 +9,9 @@
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
+        background-image: url("img/8324.png"); /* Hình nền */
+        background-size: cover; /* Đảm bảo hình nền kích thước phù hợp */
+        background-repeat: no-repeat; /* Không lặp lại hình nền */
     }
     canvas {
         border: 1px solid #000;
@@ -26,12 +29,6 @@
         font-size: 16px;
         cursor: pointer;
     }
-    .canvas-pencil-cursor {
-        cursor: url('./img/pencil-1581_Wa2qgFNcG.png') 3 25, auto;
-    }
-    .color-picker {
-        margin-top: 10px;
-    }
     .color-box {
         display: inline-block;
         width: 20px;
@@ -44,13 +41,20 @@
 </head>
 <body>
 <h1>Vẽ nhân vật của bạn</h1>
+
+<label for="charName">Tên nhân vật:</label>
+<input type="text" id="charName" name="charName" required placeholder="Tên nhân vật"> <br> <br>
+<label for="imageCode">Mã nhân vật:</label>
+<input type="text" id="imageCode" placeholder="Nhập mã ảnh">
+
+<canvas id="myCanvas" width="300" height="300"></canvas>
 <div class="toolbar">
     <button onclick="clearCanvas()">Xóa</button>
     <button onclick="saveImage()">Lưu</button>
-    <input type="color" id="colorPicker" class="color-picker" value="#000000" onchange="setColor(this.value)">
+    <button onclick="showImage()">Hiển thị ảnh</button>
+    <input type="color" id="colorPicker" value="#000000" onchange="setColor(this.value)">
     <button onclick="setTool('pen')">Bút vẽ</button>
-    <button onclick="setTool('eraser')">Tẩy</button><br> 
-    <br>
+    <button onclick="setTool('eraser')">Tẩy</button><br> <br>
     <div class="color-palette">
         <div class="color-box" style="background-color: yellow" onclick="setColor('yellow')"></div>
         <div class="color-box" style="background-color: white" onclick="setColor('white')"></div>
@@ -62,9 +66,6 @@
         <div class="color-box" style="background-color: green" onclick="setColor('green')"></div>
     </div>
 </div>
-<label for="charName">Tên nhân vật:</label>
-<input type="text" id="charName" name="charName" required>
-<canvas id="myCanvas" width="300" height="300"></canvas>
 <script>
     const canvas = document.getElementById('myCanvas');
     const context = canvas.getContext('2d');
@@ -74,7 +75,7 @@
     let currentColor = '#000000'; // Màu vẽ hiện tại, mặc định là đen
     let currentTool = 'pen'; // Công cụ vẽ hiện tại, mặc định là bút vẽ
 
-    const gridSize = 10; // Kích thước của mỗi ô vuông
+    const gridSize = 15; // Kích thước của mỗi ô vuông
 
     let painting = false;
 
@@ -125,12 +126,15 @@
         }
 
         const dataURL = canvas.toDataURL();
-        const a = document.createElement('a');
-        a.href = dataURL;
-        a.download = charNameInput.value.trim() + '_character.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const encodedDataURL = encodeImageDataURL(dataURL);
+
+        // Hiển thị mã dữ liệu của hình ảnh
+        const imageCodeInput = document.getElementById('imageCode');
+        imageCodeInput.value = encodedDataURL;
+    }
+
+    function encodeImageDataURL(dataURL) {
+        return dataURL.split(',')[1];
     }
 
     function setColor(color) {
@@ -148,6 +152,18 @@
                 context.strokeRect(x, y, gridSize, gridSize);
             }
         }
+    }
+
+    function showImage() {
+        const imageCodeInput = document.getElementById('imageCode');
+        const dataURL = 'data:image/png;base64,' + imageCodeInput.value;
+
+        const img = new Image();
+        img.onload = function () {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+        img.src = dataURL;
     }
 
     canvas.addEventListener('mousedown', startPosition);
