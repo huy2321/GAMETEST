@@ -1,186 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vẽ nhân vật</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-image: url("img/8324.png"); /* Hình nền */
-        background-size: cover; /* Đảm bảo hình nền kích thước phù hợp */
-        background-repeat: no-repeat; /* Không lặp lại hình nền */
-    }
-    canvas {
-        border: 1px solid #000;
-        cursor: crosshair;
-        display: block;
-        margin: 20px auto;
-    }
-    .toolbar {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    .toolbar button {
-        padding: 10px 20px;
-        margin: 0 5px;
-        font-size: 16px;
-        cursor: pointer;
-    }
-    .color-box {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        margin: 0 5px;
-        border: 1px solid #000;
-        cursor: pointer;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vẽ nhân vật</title>
+    <style>
+        /* CSS */
+        /* Chọn tất cả các phần tử trên trang khi di chuột */
+        *:hover {
+            font-weight: normal !important;
+            /* Hủy tô đậm */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("img/8324.png");
+            /* Hình nền */
+            background-size: cover;
+            /* Đảm bảo hình nền kích thước phù hợp */
+            background-repeat: no-repeat;
+            /* Không lặp lại hình nền */
+            
+        }
+
+        
+
+        canvas {
+            border: 1px solid #000;
+            cursor: crosshair;
+            margin: 5px auto;
+            background-color: rgba(255, 255, 255, 0.5); /* Màu nền cho canvas */
+            box-shadow: 0 0 20px 10px rgba(0, 0, 0, 0.5); /* Thêm hiệu ứng ánh sáng */
+        }
+
+        .toolbar {
+            text-align: right;
+            /* Dịch sang bên phải */
+            margin-bottom: 20px;
+        }
+
+        .toolbar button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .color-box {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin: 0 5px;
+            border: 1px solid #000;
+            cursor: pointer;
+        }
+
+        .function {
+            display: none;
+            position: fixed;
+            /* Đặt vị trí cố định */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* Dịch chuyển về giữa màn hình */
+            background-color: #fff;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            /* Thêm đổ bóng */
+            z-index: 1;
+            /* Đảm bảo popup luôn hiển thị phía trên */
+            cursor: move;
+            /* Biến con trỏ thành dấu tay khi kéo */
+        }
+
+        #canvasPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+    </style>
 </head>
+
 <body>
-<h1>Vẽ nhân vật của bạn</h1>
+    <h1>Vẽ nhân vật của bạn</h1>
 
-<label for="charName">Tên nhân vật:</label>
-<input type="text" id="charName" name="charName" required placeholder="Tên nhân vật"> <br> <br>
-<label for="imageCode">Mã nhân vật:</label>
-<input type="text" id="imageCode" placeholder="Nhập mã ảnh">
+    <label for="charName">Tên nhân vật:</label>
+    <input type="text" id="charName" name="charName" required placeholder="Tên nhân vật"> <br> <br>
+    <label for="imageCode">Mã nhân vật:</label>
+    <input type="text" id="imageCode" placeholder="Nhập mã ảnh">
 
-<canvas id="myCanvas" width="300" height="300"></canvas>
-<div class="toolbar">
-    <button onclick="clearCanvas()">Xóa</button>
-    <button onclick="saveImage()">Lưu</button>
-    <button onclick="showImage()">Hiển thị ảnh</button>
-    <input type="color" id="colorPicker" value="#000000" onchange="setColor(this.value)">
-    <button onclick="setTool('pen')">Bút vẽ</button>
-    <button onclick="setTool('eraser')">Tẩy</button><br> <br>
-    <div class="color-palette">
-        <div class="color-box" style="background-color: yellow" onclick="setColor('yellow')"></div>
-        <div class="color-box" style="background-color: white" onclick="setColor('white')"></div>
-        <div class="color-box" style="background-color: red" onclick="setColor('red')"></div>
-        <div class="color-box" style="background-color: black" onclick="setColor('black')"></div>
-        <div class="color-box" style="background-color: purple" onclick="setColor('purple')"></div>
-        <div class="color-box" style="background-color: cyan" onclick="setColor('cyan')"></div>
-        <div class="color-box" style="background-color: brown" onclick="setColor('brown')"></div>
-        <div class="color-box" style="background-color: green" onclick="setColor('green')"></div>
+    <div class="toolbar">
+        <button onclick="clearCanvas()">Xóa</button>
+        <button onclick="saveImage()">Lưu</button>
+        <button onclick="showImage()">Hiển thị ảnh</button>
+        <button onclick="toggleFunction()">Hiện công cụ</button>
+        <button onclick="toggleCanvas()">Hiện canvas</button>
+        <div class="function" id="functionPopup">
+            <input type="color" id="colorPicker" value="#000000" onchange="setColor(this.value)">
+            <button onclick="setTool('pen')">Bút vẽ</button>
+            <button onclick="setTool('eraser')">Tẩy</button><br> <br>
+            <div class="color-palette">
+                <div class="color-box" style="background-color: yellow" onclick="setColor('yellow')"></div>
+                <div class="color-box" style="background-color: white" onclick="setColor('white')"></div>
+                <div class="color-box" style="background-color: red" onclick="setColor('red')"></div>
+                <div class="color-box" style="background-color: black" onclick="setColor('black')"></div>
+                <div class="color-box" style="background-color: purple" onclick="setColor('purple')"></div>
+                <div class="color-box" style="background-color: cyan" onclick="setColor('cyan')"></div>
+                <div class="color-box" style="background-color: brown" onclick="setColor('brown')"></div>
+                <div class="color-box" style="background-color: green" onclick="setColor('green')"></div>
+            </div>
+        </div>
     </div>
-</div>
-<script>
-    const canvas = document.getElementById('myCanvas');
-    const context = canvas.getContext('2d');
-    const charNameInput = document.getElementById('charName');
-    const colorPicker = document.getElementById('colorPicker');
+    <div id="canvasPopup">
+        <canvas id="myCanvas" width="300" height="300"></canvas>
+    </div>
 
-    let currentColor = '#000000'; // Màu vẽ hiện tại, mặc định là đen
-    let currentTool = 'pen'; // Công cụ vẽ hiện tại, mặc định là bút vẽ
+    <script>
+        // JavaScript
+        const canvas = document.getElementById('myCanvas');
+        const context = canvas.getContext('2d');
+        const charNameInput = document.getElementById('charName');
+        const colorPicker = document.getElementById('colorPicker');
+        const functionPopup = document.getElementById('functionPopup');
+        const canvasPopup = document.getElementById('canvasPopup');
+        const canvasInPopup = document.getElementById('myCanvas');
 
-    const gridSize = 15; // Kích thước của mỗi ô vuông
+        let currentColor = '#000000'; // Màu vẽ hiện tại, mặc định là đen
+        let currentTool = 'pen'; // Công cụ vẽ hiện tại, mặc định là bút vẽ
 
-    let painting = false;
+        const gridSize = 15; // Kích thước của mỗi ô vuông
 
-    function startPosition(e) {
-        painting = true;
-        draw(e);
-    }
+        let painting = false;
 
-    function endPosition() {
-        painting = false;
-        context.beginPath();
-    }
-
-    function draw(e) {
-        if (!painting) return;
-
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const gridX = Math.floor(x / gridSize) * gridSize; // Tính toán vị trí ô vuông
-        const gridY = Math.floor(y / gridSize) * gridSize;
-
-        if (currentTool === 'pen') {
-            context.fillStyle = currentColor; // Sử dụng màu vẽ hiện tại
-        } else if (currentTool === 'eraser') {
-            context.fillStyle = '#ffffff'; // Màu nền của canvas để tẩy
+        function startPosition(e) {
+            painting = true;
+            draw(e);
         }
 
-        context.fillRect(gridX, gridY, gridSize, gridSize); // Vẽ ô vuông
-
-        // Vẽ đường viền xung quanh ô vuông
-        context.strokeStyle = '#ccc'; // Màu đường viền
-        context.strokeRect(gridX, gridY, gridSize, gridSize);
-
-        context.stroke();
-    }
-
-    function clearCanvas() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        drawGrid(); // Vẽ lại lưới ô vuông sau khi xóa
-    }
-
-    function saveImage() {
-        if (charNameInput.value.trim() === '') {
-            alert('Vui lòng nhập tên nhân vật.');
-            return;
+        function endPosition() {
+            painting = false;
+            context.beginPath();
         }
 
-        const dataURL = canvas.toDataURL();
-        const encodedDataURL = encodeImageDataURL(dataURL);
+        function draw(e) {
+            if (!painting) return;
 
-        // Hiển thị mã dữ liệu của hình ảnh
-        const imageCodeInput = document.getElementById('imageCode');
-        imageCodeInput.value = encodedDataURL;
-    }
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
-    function encodeImageDataURL(dataURL) {
-        return dataURL.split(',')[1];
-    }
+            const gridX = Math.floor(x / gridSize) * gridSize; // Tính toán vị trí ô vuông
+            const gridY = Math.floor(y / gridSize) * gridSize;
 
-    function setColor(color) {
-        currentColor = color;
-    }
+            if (currentTool === 'pen') {
+                context.fillStyle = currentColor; // Sử dụng màu vẽ hiện tại
+            } else if (currentTool === 'eraser') {
+                context.fillStyle = '#ffffff'; // Màu nền của canvas để tẩy
+            }
 
-    function setTool(tool) {
-        currentTool = tool;
-    }
+            context.fillRect(gridX, gridY, gridSize, gridSize); // Vẽ ô vuông
 
-    function drawGrid() {
-        for (let x = 0; x < canvas.width; x += gridSize) {
-            for (let y = 0; y < canvas.height; y += gridSize) {
-                context.strokeStyle = '#ccc'; // Màu đường viền
-                context.strokeRect(x, y, gridSize, gridSize);
+            // Vẽ đường viền xung quanh ô vuông
+            context.strokeStyle = '#ccc'; // Màu đường viền
+            context.strokeRect(gridX, gridY, gridSize, gridSize);
+
+            context.stroke();
+        }
+
+        function clearCanvas() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid(); // Vẽ lại lưới ô vuông sau khi xóa
+        }
+
+        function saveImage() {
+            if (charNameInput.value.trim() === '') {
+                alert('Vui lòng nhập tên nhân vật.');
+                return;
+            }
+
+            const dataURL = canvas.toDataURL();
+            const encodedDataURL = encodeImageDataURL(dataURL);
+
+            // Hiển thị mã dữ liệu của hình ảnh
+            const imageCodeInput = document.getElementById('imageCode');
+            imageCodeInput.value = encodedDataURL;
+        }
+
+        function encodeImageDataURL(dataURL) {
+            return dataURL.split(',')[1];
+        }
+
+        function setColor(color) {
+            currentColor = color;
+        }
+
+        function setTool(tool) {
+            currentTool = tool;
+        }
+
+        function drawGrid() {
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                for (let y = 0; y < canvas.height; y += gridSize) {
+                    context.strokeStyle = '#ccc'; // Màu đường viền
+                    context.strokeRect(x, y, gridSize, gridSize);
+                }
             }
         }
-    }
 
-    function showImage() {
-        const imageCodeInput = document.getElementById('imageCode');
-        const dataURL = 'data:image/png;base64,' + imageCodeInput.value;
+        function showImage() {
+            const imageCodeInput = document.getElementById('imageCode');
+            const dataURL = 'data:image/png;base64,' + imageCodeInput.value;
 
-        const img = new Image();
-        img.onload = function () {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.drawImage(img, 0, 0, canvas.width, canvas.height);
-        };
-        img.src = dataURL;
-    }
+            const img = new Image();
+            img.onload = function () {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            img.src = dataURL;
+        }
 
-    canvas.addEventListener('mousedown', startPosition);
-    canvas.addEventListener('mouseup', endPosition);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseenter', setPencilCursor);
-    canvas.addEventListener('mouseleave', resetCursor);
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', endPosition);
+        canvas.addEventListener('mousemove', draw);
+        drawGrid(); // Vẽ lưới ô vuông ban đầu
 
-    drawGrid(); // Vẽ lưới ô vuông ban đầu
+        function toggleFunction() {
+            functionPopup.style.display = functionPopup.style.display === 'none' ? 'block' : 'none';
+        }
 
-    function setPencilCursor() {
-        canvas.classList.add('canvas-pencil-cursor');
-    }
+        function toggleCanvas() {
+            if (canvasPopup.style.display === 'none') {
+                canvasPopup.style.display = 'block';
+            } else {
+                canvasPopup.style.display = 'none';
+            }
+        }
 
-    function resetCursor() {
-        canvas.classList.remove('canvas-pencil-cursor');
-    }
-</script>
+        let isDragging = false;
+        let offset = { x: 0, y: 0 };
+
+        function startDrag(e) {
+            isDragging = true;
+            const rect = functionPopup.getBoundingClientRect();
+            offset = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        function dragPopup(e) {
+            if (isDragging) {
+                functionPopup.style.left = (e.clientX - offset.x) + 'px';
+                functionPopup.style.top = (e.clientY - offset.y) + 'px';
+            }
+        }
+
+        functionPopup.addEventListener('mousedown', startDrag);
+        window.addEventListener('mouseup', endDrag);
+        window.addEventListener('mousemove', dragPopup);
+    </script>
 </body>
+
 </html>
